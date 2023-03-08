@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    int id =0;
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+<div class="text-center">
+    <h1 class="display-4">Cliente</h1>
+    <input type="hidden" id="IdCodigoSelecionado" value="@id"/>
+    <button type="button" class="btn btn-primary" onclick="adicionar()">Adicionar Cliente</button>
+    <button type="button" class="btn btn-primary" onclick="editar()">Editar Cliente</button>
+    <button type="button" class="btn btn-primary" onclick="excluir()">Excluir Cliente</button>
+    <a class="navbar-brand" id="EditarLink" asp-area="" asp-controller="Home" asp-action="Cliente" asp-route-codigo="@id" hidden>Editar</a>
+    <a class="navbar-brand" id="AdicionarLink" asp-area="" asp-controller="Home" asp-action="Cliente" asp-route-codigo="0" hidden>Adicionar</a>
+    <table id="table" class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Código</th>
+                <th scope="col">Nome</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        obterTodos();
+
+        
+    });
+
+    function adicionar(){
+        $('#AdicionarLink')[0].click();
+    }
+
+    function editar() {
+        if($('input[name="radiotable"]:checked').val() == undefined){
+            alert("selecione uma opção na tabela")
+        } else {
+            var id = $('input[name="radiotable"]:checked').attr('id').split('-')[1];
+           // $('#IdCodigoSelecionado').val(id);
+            $('#IdCodigoSelecionado').attr('value', id)
+            chamarEditar();
+        }
+    }
+
+    function chamarEditar(){
+        $('#EditarLink')[0].click();
+    }
+
+    function chamarHome() {
+        $('#Home')[0].click();
+    }
+
+    function obterTodos() {
+        $.ajax('https://localhost:7217/api/cliente',{
+            type:'GET',
+            success: function (data) {
+                console.log(data);
+                preencherTabela(data);
+            }
+        });
+    }
+
+    function excluirChamada(id){
+        $.ajax('https://localhost:7217/api/cliente?codigo='+id, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: 'DELETE',
+            dataType: 'json',
+            success: function () {
+                chamarHome();
+            }
+        });
+    }
+
+    function excluir(){
+        if ($('input[name="radiotable"]:checked').val() == undefined) {
+            alert("selecione uma opção na tabela")
+        } else {
+            var id = $('input[name="radiotable"]:checked').attr('id').split('-')[1];
+            excluirChamada(id);
+        }
+    }
+
+    function preencherTabela(data){
+        $(function () {
+            $.each(data, function (i, item) {
+                var r = $('<input/>').attr({
+                    type: "radio",
+                    class: "form-check-input",
+                    name:"radiotable",
+                    id: "radio-"+item.codigo
+                });
+
+                var $tr = $('<tr>').append(
+                    $('<td>').append(r),
+                    $('<td>').text(item.codigo),
+                    $('<td>').text(item.nome),
+                ).appendTo('#table');
+
+            });
+        });
+    }
+</script>
