@@ -1,6 +1,17 @@
 ﻿@model int
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<input type="hidden" id="codigoAtualizar" value="@Model" />
+<input type="hidden" id="DataInsercao" />
+@if (Model != 0)
+{
+    <h2>Editar</h2>
+}
+else
+{
+    <h2>Cadastrar</h2>
+}
+<br />
 <form>
     <div class="mb-3">
         <label for="nome" class="form-label">Nome</label>
@@ -18,10 +29,59 @@
         <label for="uf" class="form-label">UF</label>
         <input type="text" class="form-control" id="uf">
     </div>
-    <button type="button" class="btn btn-primary" onclick="salvar()">Salvar</button>
+    <button type="button" id="buttonSalvar" class="btn btn-primary" onclick="salvar()">Salvar</button>
+    <button type="button" id="buttonEditar" class="btn btn-primary" onclick="editar()">Editar</button>
 </form>
 
 <script>
+    $('#buttonEditar').hide()
+    $(document).ready(function () {
+        $
+        if($('#codigoAtualizar').val() != 0){
+            $.ajax('https://localhost:7217/api/cliente/' + $('#codigoAtualizar').val(), {
+                type: 'GET',
+                success: function (data) {
+                    preencherCampos(data);
+                    $('#buttonEditar').show()
+                    $('#buttonSalvar').hide()
+                },
+                error: function(){
+                    alert("Registro não encontrado");
+                    $('#Home')[0].click();
+                }
+            });
+        }
+    });
+
+    function preencherCampos(data){
+        $('#nome').val(data.nome);
+        $('#endereco').val(data.endereco);
+        $('#cidade').val(data.cidade);
+        $('#uf').val(data.uf);
+        debugger
+        $('#DataInsercao').val(data.dataInsercao);
+    }
+
+    function editar() {
+        var valid = validacaoForm();
+
+        if (valid) {
+            $.ajax('https://localhost:7217/api/cliente', {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: 'PUT',
+                data: montarCliente(true),
+                dataType: 'json',
+                success: function () {
+                    $('#Home')[0].click();
+                }
+            });
+        } else {
+            alert("Preencha todos os campos")
+        }
+    }
 
     function salvar() {
 
@@ -34,7 +94,7 @@
                     'Content-Type': 'application/json'
                 },
                 type: 'POST',
-                data: montarCliente(),
+                data: montarCliente(false),
                 dataType: 'json',
                 success: function () {
                     $('#Home')[0].click();
@@ -45,14 +105,25 @@
         }
     }
 
-    function montarCliente(){
-        var cliente = {
-            "nome": $('#nome').val(),
-            "endereco": $('#endereco').val(),
-            "cidade": $('#cidade').val(),
-            "uf": $('#uf').val(),
+    function montarCliente(isEditar){
+        var cliente;
+        if(isEditar){
+            cliente = {
+                "codigo": isEditar ? $('#codigoAtualizar').val() : 0,
+                "nome": $('#nome').val(),
+                "endereco": $('#endereco').val(),
+                "cidade": $('#cidade').val(),
+                "uf": $('#uf').val(),
+                "dataInsercao": isEditar ? $('#DataInsercao').val() : ""
+            }
+        }else{
+            var cliente = {
+                "nome": $('#nome').val(),
+                "endereco": $('#endereco').val(),
+                "cidade": $('#cidade').val(),
+                "uf": $('#uf').val()
+            }
         }
-
         return JSON.stringify(cliente);
     }
 

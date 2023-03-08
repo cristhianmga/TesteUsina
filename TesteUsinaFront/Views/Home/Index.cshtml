@@ -6,14 +6,15 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
 <div class="text-center">
-    <h1 class="display-4">Cliente</h1>
+    <h1 class="display-4">Lista de Clientes</h1>
+    <br />
     <input type="hidden" id="IdCodigoSelecionado" value="@id"/>
     <button type="button" class="btn btn-primary" onclick="adicionar()">Adicionar Cliente</button>
-    <button type="button" class="btn btn-primary" onclick="editar()">Editar Cliente</button>
-    <button type="button" class="btn btn-primary" onclick="excluir()">Excluir Cliente</button>
+    <button type="button" class="btn btn-secondary" onclick="editar()">Editar Cliente</button>
+    <button type="button" class="btn btn-danger" onclick="excluir()">Excluir Cliente</button>
     <a class="navbar-brand" id="EditarLink" asp-area="" asp-controller="Home" asp-action="Cliente" asp-route-codigo="@id" hidden>Editar</a>
     <a class="navbar-brand" id="AdicionarLink" asp-area="" asp-controller="Home" asp-action="Cliente" asp-route-codigo="0" hidden>Adicionar</a>
-    <table id="table" class="table">
+    <table id="table" class="table table-striped">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -41,8 +42,9 @@
             alert("selecione uma opção na tabela")
         } else {
             var id = $('input[name="radiotable"]:checked').attr('id').split('-')[1];
-           // $('#IdCodigoSelecionado').val(id);
-            $('#IdCodigoSelecionado').attr('value', id)
+            var originalUrl = $('#EditarLink').attr('href').split('?')[0];
+            var updateUrl = originalUrl + "?codigo=" + id;
+            $('#EditarLink').attr('href',updateUrl);
             chamarEditar();
         }
     }
